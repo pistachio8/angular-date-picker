@@ -16,6 +16,8 @@ import * as moment from 'moment';
         <input type="text" class="date-picker-form" (input)="textDate = $event.target.value" [value]="dateFrom">
         <input type="text" class="date-picker-form" (input)="textDate = $event.target.value" [value]="dateTo">
       </div>
+      <button (click)="setMonth()"> 한달 </button>
+      <button (click)="setYear()"> 1년 </button>
       <div class="date-picker">
         <div class="calender-header">
           <span (click)="setPrevMonth()">prev</span>
@@ -41,9 +43,14 @@ import * as moment from 'moment';
           </thead>
           <tbody>
             <tr *ngFor="let item of dates">
-            <td *ngFor="let data of item" [attr.aria-label]="data?.detail">
-              <div [ngClass]="{ 'selected-today' : selectedToday( data?.detail ), 'selected-date' : isSelectedDate( data?.detail ), 'selected-days' : isSelectedRange( data?.detail ) }" (click)="selectDate( data?.detail )"> {{ data?.date }} </div>
-            </td>
+            <ng-container *ngFor="let data of item">
+              <ng-container *ngIf="data.colspan">
+              <td [attr.colspan]="data.colspan">
+              </ng-container>
+              <td [attr.aria-label]="data?.detail">
+                <div [ngClass]="{ 'selected-today' : selectedToday( data?.detail ), 'selected-date' : isSelectedDate( data?.detail ), 'selected-days' : isSelectedRange( data?.detail ) }" (click)="selectDate( data?.detail )"> {{ data?.date }} </div>
+              </td>
+            </ng-container>
             </tr>
           </tbody>
         </table>
@@ -61,18 +68,19 @@ export class DatePickerComponent implements OnInit {
   prevMonth: number;
   nextMonth: number;
 
-  startOfMonth: number;
-  endOfMonth: number;
+  // startOfMonth: number;
+  // endOfMonth: number;
 
   selectedYear: number;
-  selectedMonth: number;
+  selectedMonth: any;
   selectedDate: string;
 
+  date = moment();
   dateFrom: string = '';
   dateTo: string = '';
 
   dates: any[];
-  datesInMonth: any[];
+  // datesInMonth: any[];
   years: number[];
 
   constructor() {}
@@ -105,14 +113,12 @@ export class DatePickerComponent implements OnInit {
   // }
 
   countWeeks( daysInMonth: number, firstDayInMonth: number ) {
-    // 30 + 6 =  36 / 7 ? 5 + 1 = 6
     return ( Math.trunc( ( daysInMonth + firstDayInMonth ) / 7 ) ) + 1;
   }
 
   selectedToday( date: number ) {
     // moment().diff 두 날짜 사이의 반올림된 밀리 초 차이를 기반으로 값 반환, 전체값 보려면 세번째 매개 변수로 true 전달
     // moment().diff( date, 'days', true )
-    
     return moment( date ).isSame( this.today );
   }
 
@@ -127,7 +133,6 @@ export class DatePickerComponent implements OnInit {
     } else {
       return false;
     }
-    // return this.selectedDate === date ? true : false;
   }
 
   isSelectedRange( date ) {
@@ -137,6 +142,15 @@ export class DatePickerComponent implements OnInit {
   }
 
   // 한달, 올해, 작년, 내년 범위 세팅
+  setMonth() {
+    this.dateFrom = moment().year( this.selectedYear ).month( this.selectedMonth ).startOf( 'month' ).format( 'YYYY-MM-DD' );
+    this.dateTo = moment().year( this.selectedYear ).month( this.selectedMonth ).endOf( 'month' ).format( 'YYYY-MM-DD' );
+  }
+
+  setYear() {
+    this.dateFrom = moment().year( this.selectedYear ).startOf( 'year' ).format( 'YYYY-MM-DD' );
+    this.dateTo = moment().year( this.selectedYear ).endOf( 'year' ).format( 'YYYY-MM-DD' );
+  }
 
   displaySelectDate() {
     return moment( this.dateFrom ).diff( this.dateTo, 'days' );
@@ -147,8 +161,9 @@ export class DatePickerComponent implements OnInit {
   }
 
   // 현재 년도에서 -10 ~ +20 인 배열
-  makeArrayYears() {
+  makeArrayYears(): number[] {
     let standardYear = this.selectedYear;
+    this.years = [];
 
     const pastYears = Array(10).fill(null).reduce( (acc, value, index) => {
 
@@ -169,7 +184,7 @@ export class DatePickerComponent implements OnInit {
       }
       return acc;
     }, []);
-    this.years = [ ...pastYears, standardYear, ...futureYears ];
+    return this.years = [ ...pastYears, standardYear, ...futureYears ];
     // console.log( this.years );
   }
 
@@ -182,60 +197,90 @@ export class DatePickerComponent implements OnInit {
   // }
 
   refresh() {
+    this.makeArrayYears();
     this.prevMonth = this.selectedMonth > 1 ? this.selectedMonth - 1 : 0;
-    this.nextMonth = this.selectedMonth < 12 ? this.selectedMonth + 1 : 0; //12월일때 내년으로 바뀌어야
+    this.nextMonth = this.selectedMonth < 12 ? this.selectedMonth + 1 : 0;
 
+    const date = moment();
     // moment( month ).startOf('M')
-    this.startOfMonth = moment().year( this.selectedYear ).month( this.selectedMonth ).startOf('month').day();
-    this.endOfMonth = moment().year( this.selectedYear ).month( this.selectedMonth ).endOf('month').date();
+    const startOfMonth = date.year( this.selectedYear ).month( this.selectedMonth ).startOf( 'month' ).day();
+    const endOfMonth = date.year( this.selectedYear ).month( this.selectedMonth ).endOf( 'month' ).date();
 
-    this.datesInMonth = Array( this.endOfMonth ).fill( null ).map( (x, i) => i + 1);
+    const makeDates = Array( endOfMonth ).fill( null ).map( (x, i) => i + 1);
     
-    const makeDates = Array( this.countWeeks( this.endOfMonth, this.startOfMonth) ).fill(Array(7));
-    // const arr2 = Array.from({length: 5}, ( e ) =>  Array(7).fill() );
+    const datesInMonth = Array( this.countWeeks( endOfMonth, startOfMonth) ).fill(Array(7));
     
-    const tasks = this.datesInMonth.slice();
-
-    this.dates = makeDates.map( ( value, index ) => {
+    this.dates = datesInMonth.map( ( item, index ) => {
       const count = 7;
-      value = [];
+      let colspan = startOfMonth;
+      item = [];
       
       for ( let i = 0; i < count; i++ ) {
-        if ( index == 0 && i < this.startOfMonth ) {
-          value.push( null );
+        if ( index === 0 && i < startOfMonth ) {
+          continue;
         } else { 
-          if ( tasks.length > 0 ) {
-            let task = tasks.shift();
-            value.push( { 
+          if ( makeDates.length > 0 ) {
+            let task = makeDates.shift();
+            const data = {
+              ...( ( index === 0 && item.length === 0 ) && { colspan }), 
               date: task, 
-              detail: moment().year( this.selectedYear ).month( this.selectedMonth ).date( task ).format('YYYY-MM-DD')
-            } );   
+              detail: date.year( this.selectedYear ).month( this.selectedMonth ).date( task ).format('YYYY-MM-DD')
+            };
+
+            item.push( data );  
           }
-          
         }
       }
+
+      // console.table( item );
+       return item;
+    });
+
+    // console.log( `이번달 첫날은 ${ this.startOfMonth }`);
+    // console.log( `이번달 마지막날은 ${ this.endOfMonth }`);
+  }
+
+  createCalender( date ) {
+    const startOfMonth = date.startOf( 'month' ).day();
+    const endOfMonth = date.endOf( 'month' ).date();
+    const makeDates = Array( endOfMonth ).fill( null ).map( (x, i) => i + 1);
+    const datesInMonth = Array( this.countWeeks( endOfMonth, startOfMonth) ).fill(Array(7));
+
+    this.dates = datesInMonth.map( ( item, index ) => {
+      // const count = 7;
+      // item = [];
       
-      // console.table( value );
-       return value;
+      item.reduce( (acc, value, index) => {
+        if ( index == 0 ) {
+          
+          
+        }
+
+        return acc;
+      }, []);
+      
+       return item;
     });
 
     this.makeArrayYears();
-    // console.log( `이번달 첫날은 ${ this.startOfMonth }`);
-    // console.log( `이번달 마지막날은 ${ this.endOfMonth }`);
   }
 
   initDatePicker() {
     // moment().format('MM. D, YYYY [at] h:mm A z');
     // produces: "Jan. 30, 2019 at 2:35 PM"
-    this.today = moment().format('YYYY-MM-DD');
-    this.selectedYear = moment().year();
-    this.selectedMonth = moment().month();
+    this.today = this.date.format('YYYY-MM-DD');
+    this.selectedYear = this.date.year();
+    this.selectedMonth = this.date.month();
     this.selectDate( this.today );
     this.refresh();
+    // this.createCalender( this.date );
   }
 
   setNextMonth() {
-    // this.selectedDate.add(1, 'M')
+    // this.selectedMonth = moment(this.selectedDate).add(1, 'M').month();
+    // this.refresh();
+    // this.date = moment( this.date ).add(1, 'M');
+    // this.createCalender( this.date );
     if ( this.selectedMonth > 10 ) {
       this.selectedMonth = 0;
       this.selectedYear += 1;
@@ -247,7 +292,10 @@ export class DatePickerComponent implements OnInit {
   }
 
   setPrevMonth() {
-    // this.selectedDate.subtract(1, 'M')
+    // this.selectedMonth = moment(this.selectedDate).subtract(1, 'M').month();
+    // this.refresh();
+    // this.date = moment( this.date ).subtract(1, 'M');
+    // this.createCalender( this.date );
     if ( this.selectedMonth < 2 ) {
       this.selectedMonth = 11;
       this.selectedYear -= 1;
@@ -259,8 +307,10 @@ export class DatePickerComponent implements OnInit {
   }
 
   changeSelectYear( year ) {
-    this.selectedYear = year;
+    this.selectedYear = parseInt(year);
+    // this.date.year();
     this.refresh();
+    // this.createCalender( this.date );
   }
 
   ngOnInit() {
