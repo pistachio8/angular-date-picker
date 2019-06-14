@@ -4,10 +4,54 @@ $fontColor: #979ea5;
 :host {
     width: 100%;
     height: 100%;
+    background: #fff;
 }
 
 table {
     border-collapse: collapse;
+}
+
+.icon-prev {
+    position: relative;
+    display: block;
+    width: 20px;
+    height: 5px;
+    background: darken($fontColor, 20%);
+    transform: rotate(-45deg);
+    transform-origin: top right;
+    transition: scale .3s ease-in-out; 
+    &:after {
+        position: absolute;
+        top: 8px;
+        left: -8px;
+        content: '';
+        display: block;
+        width: 20px;
+        height: 5px;
+        background: darken($fontColor, 20%);
+        transform: rotate(-90deg); 
+    }
+}
+
+.icon-next {
+    position: relative;
+    display: block;
+    width: 20px;
+    height: 5px;
+    background: darken($fontColor, 20%);
+    transform: rotate(45deg); 
+    transform-origin: bottom left;
+    &:after {
+        position: absolute;
+        top: 8px;
+        right: -8px;
+        content: '';
+        display: block;
+        width: 20px;
+        height: 5px;
+        background: darken($fontColor, 20%);
+        transform: rotate(90deg); 
+    }
 }
 
 .date-picker-table thead {
@@ -19,22 +63,86 @@ table {
     background: #fff;
     border-radius: 2px;
     margin: 0 auto;
-    .input-container {
+    padding: 3em;
+    .display-pannel {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        .date-picker-form {
+        flex-flow: row wrap;
+        .input-container {
+            position: relative;
+            display: flex;
+            flex: 0 0 45%;
             width: 40%;
             max-width: 250px;
-            height: 30px;
+            span:first-child {
+                position: absolute;
+                top: -10px;
+                left: 11px;
+                font-size: .9em;
+            }
+            .notice-text {
+                position: absolute;
+                left: 11px;
+                bottom: -9px;
+                font-size: .8em;
+            }
+        }
+        .text-container {
+            display: flex;
+            align-items: baseline;
+            margin: 30px 0;
+            h3 {
+                font-size: 1.5em;
+                color: darken($fontColor, 15%);
+            }
+            p {
+                font-size: .9em;
+                margin-left: 8px;
+                span {
+                    font-size: 1.1em;
+                    font-weight: 600;
+                }
+            }
+        }
+        .date-picker-form {
+            width: 100%;
+            height: 50px;
             margin: 10px 0;
             padding: 10px 10px 10px 20px;
             font-size: 1em;
             color: #495057;
             background: #F1F3F5;
             border: none;
-            border-radius: 3x;
+            border-radius: 3px;
         }
+    }
+}
+
+.date-picker {
+    padding: 1em;
+    border-radius: 6px;
+    box-shadow: 0px 4px 9px 1px darken($fontColor, 20%);
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-flow: row wrap;
+    width: 100%;
+    margin: 10px 0;
+    button {
+        width: 25%;
+        height: 30px;
+        line-height: 30px;
+        background: $themeColor;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        font-size: .9em;
+        margin: 10px;
+        outline: none;
     }
 }
 
@@ -45,7 +153,14 @@ table {
     height: 50px;
     padding: 0 6%;
     span {
+        display: block;
+        width: 25px;
+        height: 25px;
         cursor: pointer;
+        transition: scale .3s ease-in-out;
+        &:active {
+            transform: scale(0.8);
+        }
     }
 }
 
@@ -58,7 +173,7 @@ table {
 
 .select-year {
     position: absolute;
-    left: 40px;
+    left: 28px;
 }
 
 .date-picker-table {
@@ -91,13 +206,14 @@ table {
             align-items: center;
             width: 90%;
             height: 90%;
+            box-sizing: border-box;
         }
     }
 }
 
 .selected-today {
-    // border: 1px solid #0099fb; 
-    box-shadow: inset 0px 0px 0px 1px $themeColor;
+    border: 1px solid #0099fb; 
+    // box-shadow: inset 0px 0px 0px 1px $themeColor;
 }
 
 .selected-date {

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DatePickerService } from '../date-picker.service';
 
 import * as moment from 'moment';
+import { ThrowStmt } from '@angular/compiler';
 
 /*
   달력 출력, 날짜 클릭시 입력
@@ -12,22 +13,49 @@ import * as moment from 'moment';
   template: `
     <h2>date Picker</h2>
     <div class="date-picker-container">
-      <div class="input-container">
-        <input type="text" class="date-picker-form" (input)="textDate = $event.target.value" [value]="dateFrom">
-        <input type="text" class="date-picker-form" (input)="textDate = $event.target.value" [value]="dateTo">
+      <div class="display-pannel">
+          <div class="input-container">
+            <span>To</span>
+            <input type="text" class="date-picker-form" [value]="dateFrom" disabled>
+            <span class="notice-text" *ngIf="dateFrom === '' ">시작 날짜를 설정하세요.</span>
+          </div>
+          <div class="input-container">  
+            <span>From</span>
+            <input type="text" class="date-picker-form" [value]="dateTo" disabled>
+            <span class="notice-text" *ngIf="dateTo === '' ">끝나는 날짜를 설정하세요.</span>
+            <span></span>
+          </div>
+          <div class="text-container">
+            <h3>{{ displaySelectDays() }} Days</h3>
+            <p><span>{{ dateFrom }}</span> to <span>{{ dateTo }}</span></p>
+          </div>
       </div>
-      <button (click)="setMonth()"> 한달 </button>
-      <button (click)="setYear()"> 1년 </button>
+      <div class="button-container">
+        <button (click)="selectPeriodOption( 'this', 'week' )"> 이번주 </button>
+        <button (click)="selectPeriodOption( 'last', 'week' )"> 지난주 </button>
+        <button (click)="selectPeriodOption( 'next', 'week' )"> 다음주 </button>
+        <button (click)="selectPeriodOption( 'this', 'month' )"> 이번달 </button>
+        <button (click)="selectPeriodOption( 'last', 'month' )"> 지난달 </button>
+        <button (click)="selectPeriodOption( 'next', 'month' )"> 다음달 </button>
+        <button (click)="selectAllDayInMonth()"> 선택달 </button>
+        <button (click)="selectPeriodOption( 'this', 'year' )"> 올해 </button>
+        <button (click)="selectPeriodOption( 'last', 'year' )"> 작년 </button>
+        <button (click)="selectPeriodOption( 'next', 'year' )"> 내년 </button>
+      </div>
       <div class="date-picker">
         <div class="calender-header">
-          <span (click)="setPrevMonth()">prev</span>
+          <span (click)="setPrevMonth()">
+            <i class="icon-prev"></i>
+          </span>
           <div class="calender-heading-year-month">
             <h3 class="month">{{ selectedMonth + 1 }}</h3>
             <select class="select-year" (change)="changeSelectYear($event.target.value)">
               <option *ngFor="let year of years" [selected]="isSelectedYear(year)">{{ year }}</option>
             </select>
           </div>
-          <span (click)="setNextMonth()">next</span>
+          <span (click)="setNextMonth()">
+          <i class="icon-next"></i>
+          </span>
         </div>
         <table class="date-picker-table">
           <thead>
@@ -42,8 +70,8 @@ import * as moment from 'moment';
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of dates">
-            <ng-container *ngFor="let data of item">
+            <tr *ngFor="let date of dates">
+            <ng-container *ngFor="let data of date">
               <ng-container *ngIf="data.colspan">
               <td [attr.colspan]="data.colspan">
               </ng-container>
@@ -60,19 +88,12 @@ import * as moment from 'moment';
   styleUrls: ['./date-picker.component.scss']
 })
 export class DatePickerComponent implements OnInit {
-  // 오늘, 이번달 첫째날, 이번달 둘째날, 이전달, 다음달, 년도
-  // 달의 시작하는 날 colspan
   textDate: string;
 
-  today: any;
-  prevMonth: number;
-  nextMonth: number;
-
-  // startOfMonth: number;
-  // endOfMonth: number;
+  today: string;
 
   selectedYear: number;
-  selectedMonth: any;
+  selectedMonth: number;
   selectedDate: string;
 
   date = moment();
@@ -80,7 +101,6 @@ export class DatePickerComponent implements OnInit {
   dateTo: string = '';
 
   dates: any[];
-  // datesInMonth: any[];
   years: number[];
 
   constructor() {}
@@ -96,14 +116,13 @@ export class DatePickerComponent implements OnInit {
         // this.swapDate( this.dateFrom, this.dateTo );
       }
     } else if ( this.dateFrom && this.dateTo ) {
-      if ( moment( date ).isAfter( this.dateFrom ) && ! moment( date ).isSame( this.dateTo ) ) {
-        this.dateTo = date;
-        return;
-      }
+      // if ( moment( date ).isAfter( this.dateFrom ) && ! moment( date ).isSame( this.dateTo ) ) {
+      //   this.dateTo = date;
+      //   return;
+      // }
       this.dateFrom = date;
       this.dateTo = '';
     }
-    // console.log( `${date}, ${this.dateFrom}, ${this.dateTo}` );
   }
 
   // swapDate(date1, date2) {
@@ -117,8 +136,6 @@ export class DatePickerComponent implements OnInit {
   }
 
   selectedToday( date: number ) {
-    // moment().diff 두 날짜 사이의 반올림된 밀리 초 차이를 기반으로 값 반환, 전체값 보려면 세번째 매개 변수로 true 전달
-    // moment().diff( date, 'days', true )
     return moment( date ).isSame( this.today );
   }
 
@@ -128,11 +145,7 @@ export class DatePickerComponent implements OnInit {
   }
 
   isSelectedDate( date ) {
-    if ( date === this.dateFrom || date === this.dateTo) {
-      return true;
-    } else {
-      return false;
-    }
+    return ( date === this.dateFrom || date === this.dateTo ) ? true : false; 
   }
 
   isSelectedRange( date ) {
@@ -140,20 +153,33 @@ export class DatePickerComponent implements OnInit {
       return true;
     }
   }
-
-  // 한달, 올해, 작년, 내년 범위 세팅
-  setMonth() {
+  
+  selectAllDayInMonth() {
     this.dateFrom = moment().year( this.selectedYear ).month( this.selectedMonth ).startOf( 'month' ).format( 'YYYY-MM-DD' );
     this.dateTo = moment().year( this.selectedYear ).month( this.selectedMonth ).endOf( 'month' ).format( 'YYYY-MM-DD' );
   }
 
-  setYear() {
-    this.dateFrom = moment().year( this.selectedYear ).startOf( 'year' ).format( 'YYYY-MM-DD' );
-    this.dateTo = moment().year( this.selectedYear ).endOf( 'year' ).format( 'YYYY-MM-DD' );
+  // last, this, next, year, month, week
+  // 내역조회 용도..오늘, 이번주, 저번주, 다음주, 저번달, 다음달, 오늘을 기준으로..., 1주일, 한달, 6개월, 1년
+  // 한달, 올해, 작년, 내년 범위 세팅
+  selectPeriodOption( order, term ) {
+    if ( order === 'last' ) {
+      this.dateFrom = moment().subtract( 1, term ).startOf( term ).format( 'YYYY-MM-DD' );
+      this.dateTo = moment().subtract( 1, term ).endOf( term ).format( 'YYYY-MM-DD' );
+    } else if ( order === 'next' ) {
+      this.dateFrom = moment().add( 1, term ).startOf( term ).format( 'YYYY-MM-DD' );
+      this.dateTo = moment().add( 1, term ).endOf( term ).format( 'YYYY-MM-DD' );
+    } else {
+      this.dateFrom = moment().startOf( term ).format( 'YYYY-MM-DD' );
+      this.dateTo = moment().endOf( term ).format( 'YYYY-MM-DD' );
+    }
   }
 
-  displaySelectDate() {
-    return moment( this.dateFrom ).diff( this.dateTo, 'days' );
+  displaySelectDays() {
+    if ( this.dateFrom === '' || this.dateTo === '' ) {
+      return 0; 
+    }
+    return moment( this.dateTo ).diff( this.dateFrom, 'days' ) + 1;
   }
 
   isSelectedYear( year: number ) {
@@ -188,18 +214,12 @@ export class DatePickerComponent implements OnInit {
     // console.log( this.years );
   }
 
-  // setDateInMonth( year, month, date ) {
-  //   return moment().year( year ).month( month ).date(date); 
-  // }
-
   // dayFormatted( date ) {
   //   date.format('YYYY-MM-DD');
   // }
 
   refresh() {
     this.makeArrayYears();
-    this.prevMonth = this.selectedMonth > 1 ? this.selectedMonth - 1 : 0;
-    this.nextMonth = this.selectedMonth < 12 ? this.selectedMonth + 1 : 0;
 
     const date = moment();
     // moment( month ).startOf('M')
@@ -212,7 +232,6 @@ export class DatePickerComponent implements OnInit {
     
     this.dates = datesInMonth.map( ( item, index ) => {
       const count = 7;
-      let colspan = startOfMonth;
       item = [];
       
       for ( let i = 0; i < count; i++ ) {
@@ -222,7 +241,7 @@ export class DatePickerComponent implements OnInit {
           if ( makeDates.length > 0 ) {
             let task = makeDates.shift();
             const data = {
-              ...( ( index === 0 && item.length === 0 ) && { colspan }), 
+              ...( ( index === 0 && item.length === 0 ) ? { colspan: startOfMonth } : {}), 
               date: task, 
               detail: date.year( this.selectedYear ).month( this.selectedMonth ).date( task ).format('YYYY-MM-DD')
             };
@@ -236,8 +255,6 @@ export class DatePickerComponent implements OnInit {
        return item;
     });
 
-    // console.log( `이번달 첫날은 ${ this.startOfMonth }`);
-    // console.log( `이번달 마지막날은 ${ this.endOfMonth }`);
   }
 
   createCalender( date ) {
