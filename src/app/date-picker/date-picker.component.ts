@@ -111,10 +111,7 @@ export class DatePickerComponent implements OnInit {
       this.dateFrom = date;
     } else if ( this.dateFrom && this.dateTo === '' ) {
       this.dateTo = date;
-      if ( moment( this.dateFrom ).isAfter( this.dateTo ) ) {
-        [ this.dateFrom, this.dateTo ] = [ this.dateTo, this.dateFrom ];
-        // this.swapDate( this.dateFrom, this.dateTo );
-      }
+      this.checkDateOrder();
     } else if ( this.dateFrom && this.dateTo ) {
       // if ( moment( date ).isAfter( this.dateFrom ) && ! moment( date ).isSame( this.dateTo ) ) {
       //   this.dateTo = date;
@@ -172,6 +169,37 @@ export class DatePickerComponent implements OnInit {
     } else {
       this.dateFrom = moment().startOf( term ).format( 'YYYY-MM-DD' );
       this.dateTo = moment().endOf( term ).format( 'YYYY-MM-DD' );
+    }
+  }
+
+  checkDateOrder() {
+    if ( moment( this.dateFrom ).isAfter( this.dateTo ) ) {
+      [ this.dateFrom, this.dateTo ] = [ this.dateTo, this.dateFrom ];
+    }
+  }
+
+  selectFromToday( term ) {
+    switch ( term ) {
+      case 'week' : 
+                    this.dateFrom = this.today;
+                    this.dateTo = moment( this.dateFrom ).add(7, 'day' ).format( 'YYYY-MM-DD' );
+                    this.checkDateOrder();
+        break;
+      case 'lastWeek' : 
+                        this.dateFrom = this.today;
+                        this.dateTo = moment( this.dateFrom ).subtract(7, 'day' ).format( 'YYYY-MM-DD' );
+                        this.checkDateOrder();
+        break;
+      case 'month' :
+                    this.dateFrom = this.today; 
+                    this.dateTo = moment( this.dateFrom ).add(1, 'month' ).format( 'YYYY-MM-DD' );
+                    this.checkDateOrder();
+        break;      
+      case 'lastMonth' : 
+                        this.dateFrom = this.today;  
+                        this.dateTo = moment( this.dateFrom ).subtract(1, 'month' ).format( 'YYYY-MM-DD' );
+                        this.checkDateOrder();
+        break;    
     }
   }
 
