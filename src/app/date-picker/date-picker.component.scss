@@ -1,10 +1,77 @@
 $themeColor: #0099fb;
 $fontColor: #979ea5;
+$font-small: 10px;
+$font-medium: 14px;
+
+/* media query */
+@mixin for-size( $size ) {
+    @if ( $size == mobile ) {
+        @media screen and ( max-width: 599px ) { @content; }
+    } @else if ( $size == tablet ) {
+        @media screen and ( max-width: 999px ) and ( min-width: 600px) { @content; }
+    } @else if ( $size == desktop ) {
+        @media screen and ( min-width: 1000px ) { @content; }
+    }
+}
+
+/* icon-arrow */
+@mixin icon-arrow($direction: 'left', $width: 17px, $height: 5px, $bakcground: $fontColor ) {
+    position: relative;
+    display: block;
+    width: $width;
+    height: $height;
+    background: darken( $fontColor, 20%);
+    transition: scale .3s ease-in-out;
+    @if ( $direction == 'left' ) {
+        transform: rotate(-45deg);
+        transform-origin: top right;
+    } @else {
+        transform: rotate(45deg);
+        transform-origin: bottom left;
+    }
+    @include for-size(mobile) {
+        width: 13px;
+        height: 3px;
+    }
+    &:after {
+        position: absolute;
+        top: 6px;
+        content: '';
+        display: block;
+        width: $width;
+        height: $height;
+        background: darken( $fontColor, 20%);
+        @if ( $direction == 'left' ) {
+            left: -6px;
+            transform: rotate(-90deg);
+            @include for-size(mobile) {
+                left: -5px;
+            }
+        } @else {
+            right: -6px;
+            transform: rotate(90deg);
+            @include for-size(mobile) {
+                right: -5px;
+            }
+        }
+        @include for-size(mobile) {
+            top: 5px;
+            width: 13px;
+            height: 3px;
+        }
+    }
+}
 
 :host {
     width: 100%;
     height: 100%;
     background: #fff;
+    @include for-size(mobile) {
+        font-size: $font-small;
+    }
+    @include for-size(tablet) {
+        font-size: $font-medium;
+    }
 }
 
 .select-box-wrapper {
@@ -24,6 +91,9 @@ select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    @include for-size(mobile) {
+        width: 40px;
+    }
     &+ label {
        position: absolute;
        top: 8px;
@@ -32,6 +102,17 @@ select {
        height: 0;
        border: 6px solid transparent;
        border-color: darken( $fontColor, 28% ) transparent transparent transparent; 
+       z-index: -1;
+       @include for-size(mobile) {
+        top: 9px;
+        right: 2px;
+        border-width: 4px;
+    }
+       @include for-size(tablet) {
+            top: 9px;
+            right: 9px;
+            border-width: 5px;
+        }
     }
 }
 
@@ -45,46 +126,11 @@ table {
 }
 
 .icon-prev {
-    position: relative;
-    display: block;
-    width: 17px;
-    height: 5px;
-    background: darken($fontColor, 20%);
-    transform: rotate(-45deg);
-    transform-origin: top right;
-    transition: scale .3s ease-in-out; 
-    &::after {
-        position: absolute;
-        top: 6px;
-        left: -6px;
-        content: '';
-        display: block;
-        width: 17px;
-        height: 5px;
-        background: darken($fontColor, 20%);
-        transform: rotate(-90deg); 
-    }
+    @include icon-arrow('left');
 }
 
 .icon-next {
-    position: relative;
-    display: block;
-    width: 17px;
-    height: 5px;
-    background: darken($fontColor, 20%);
-    transform: rotate(45deg); 
-    transform-origin: bottom left;
-    &::after {
-        position: absolute;
-        top: 6px;
-        right: -6px;
-        content: '';
-        display: block;
-        width: 17px;
-        height: 5px;
-        background: darken($fontColor, 20%);
-        transform: rotate(90deg); 
-    }
+    @include icon-arrow('right');
 }
 
 .date-picker-table thead {
@@ -97,6 +143,9 @@ table {
     border-radius: 2px;
     margin: 0 auto;
     padding: 3em;
+    @include for-size(mobile) {
+        padding: 2em;           
+    }
     .display-pannel {
         display: flex;
         justify-content: space-between;
@@ -108,23 +157,38 @@ table {
             flex: 0 0 45%;
             width: 40%;
             max-width: 250px;
+            @include for-size(mobile) {
+                margin-top: 20px;
+            }
             span:first-child {
                 position: absolute;
                 top: -10px;
                 left: 11px;
                 font-size: .9em;
+                @include for-size(mobile) {
+                    top: -3px;
+                    left: 7px;
+                }
             }
             .notice-text {
                 position: absolute;
                 left: 11px;
                 bottom: -9px;
                 font-size: .8em;
+                @include for-size(mobile) {
+                    left: 7px;
+                    bottom: -5px;
+                }
             }
         }
         .text-container {
             display: flex;
             align-items: baseline;
+            width: 100%;
             margin: 30px 0;
+            @include for-size(mobile) {
+                margin: 15px 0;   
+            }
             h3 {
                 font-size: 1.5em;
                 color: darken($fontColor, 15%);
@@ -142,12 +206,15 @@ table {
             width: 100%;
             height: 50px;
             margin: 10px 0;
-            padding: 10px 10px 10px 20px;
+            padding: .8em .8em .8em 1em;
             font-size: 1em;
             color: #495057;
             background: #F1F3F5;
             border: none;
             border-radius: 3px;
+            @include for-size(mobile) {
+                height: 30px;
+            }
         }
     }
 }
@@ -191,6 +258,10 @@ table {
         height: 25px;
         cursor: pointer;
         transition: scale .3s ease-in-out;
+        @include for-size(mobile) {
+            width: 20px;
+            height: 20px;
+        }
         &:active {
             transform: scale(0.8);
         }
@@ -246,7 +317,6 @@ table {
 
 .selected-today {
     border: 1px solid #0099fb; 
-    // box-shadow: inset 0px 0px 0px 1px $themeColor;
 }
 
 .selected-date {
