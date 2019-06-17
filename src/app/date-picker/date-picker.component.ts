@@ -27,7 +27,6 @@ import { ThrowStmt } from '@angular/compiler';
           </div>
           <div class="text-container">
             <h3>{{ displaySelectDays() }} Days</h3>
-            <p><span>{{ dateFrom }}</span> to <span>{{ dateTo }}</span></p>
           </div>
       </div>
       <div class="button-container">
@@ -49,9 +48,12 @@ import { ThrowStmt } from '@angular/compiler';
           </span>
           <div class="calender-heading-year-month">
             <h3 class="month">{{ selectedMonth + 1 }}</h3>
-            <select class="select-year" (change)="changeSelectYear($event.target.value)">
-              <option *ngFor="let year of years" [selected]="isSelectedYear(year)">{{ year }}</option>
-            </select>
+            <div class="select-box-wrapper">
+              <select id="select-year" class="select-year" (change)="changeSelectYear($event.target.value)">
+                <option *ngFor="let year of years" [selected]="isSelectedYear(year)">{{ year }}</option>
+              </select>
+              <label for="select-year"></label>
+            </div>
           </div>
           <span (click)="setNextMonth()">
           <i class="icon-next"></i>

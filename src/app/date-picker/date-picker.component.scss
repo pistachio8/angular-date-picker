@@ -7,6 +7,39 @@ $fontColor: #979ea5;
     background: #fff;
 }
 
+.select-box-wrapper {
+    position: relative;
+}
+
+select {
+    width: 60px;
+    height: 20px;
+    font-size: 1em;
+    padding: 0 .5em;
+    color: darken( $fontColor, 28% );
+    border: none;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    &+ label {
+       position: absolute;
+       top: 8px;
+       right: -2px;
+       width: 0;
+       height: 0;
+       border: 6px solid transparent;
+       border-color: darken( $fontColor, 28% ) transparent transparent transparent; 
+    }
+}
+
+/* IE */
+select::-ms-expand {
+    display: none;
+}
+
 table {
     border-collapse: collapse;
 }
@@ -14,19 +47,19 @@ table {
 .icon-prev {
     position: relative;
     display: block;
-    width: 20px;
+    width: 17px;
     height: 5px;
     background: darken($fontColor, 20%);
     transform: rotate(-45deg);
     transform-origin: top right;
     transition: scale .3s ease-in-out; 
-    &:after {
+    &::after {
         position: absolute;
-        top: 8px;
-        left: -8px;
+        top: 6px;
+        left: -6px;
         content: '';
         display: block;
-        width: 20px;
+        width: 17px;
         height: 5px;
         background: darken($fontColor, 20%);
         transform: rotate(-90deg); 
@@ -36,18 +69,18 @@ table {
 .icon-next {
     position: relative;
     display: block;
-    width: 20px;
+    width: 17px;
     height: 5px;
     background: darken($fontColor, 20%);
     transform: rotate(45deg); 
     transform-origin: bottom left;
-    &:after {
+    &::after {
         position: absolute;
-        top: 8px;
-        right: -8px;
+        top: 6px;
+        right: -6px;
         content: '';
         display: block;
-        width: 20px;
+        width: 17px;
         height: 5px;
         background: darken($fontColor, 20%);
         transform: rotate(90deg); 
@@ -169,11 +202,11 @@ table {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.select-year {
-    position: absolute;
-    left: 28px;
+    transform: translateX(20%);
+    h3 {
+        font-size: 1.5em;
+        color: darken( $fontColor, 28% );
+    }
 }
 
 .date-picker-table {
